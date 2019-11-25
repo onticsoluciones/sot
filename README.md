@@ -1,2 +1,2 @@
-# sot
+# SoT
 Security of Things
