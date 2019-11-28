@@ -17,12 +17,15 @@ class AlertRepository
 
     public function save(Alert $alert)
     {
-        $sql = 'INSERT INTO alert(type, data, timestamp) VALUES(:type, :data, :timestamp);';
+        $sql = '
+          INSERT INTO alert(type, data, timestamp, priority) 
+          VALUES(:type, :data, :timestamp, :priority);';
         $statement = $this->connection->prepare($sql);
         $statement->execute([
             'type' => $alert->getType(),
             'data' => json_encode($alert->getData()),
-            'timestamp' => $alert->getTimestamp()
+            'timestamp' => $alert->getTimestamp(),
+            'priority' => $alert->getPriority()
         ]);
     }
 }

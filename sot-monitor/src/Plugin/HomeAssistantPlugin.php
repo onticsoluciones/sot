@@ -99,7 +99,7 @@ class HomeAssistantPlugin implements PluginInterface
         $alert = new Alert('new_device', [
             'entity_id' => $entityId,
             'name' => $name
-        ], time());
+        ], time(), Alert::PRIORITY_NORMAL);
 
         $this->eventDispatcher->dispatch(new AlertEvent($alert), AlertEvent::NAME);
     }
