@@ -4,6 +4,7 @@ namespace Ontic\Sot\Monitor\Plugin;
 
 use Ontic\Sot\Monitor\Event\AlertEvent;
 use Ontic\Sot\Monitor\Model\Alert;
+use Ontic\Sot\Monitor\Model\Configuration;
 use Ontic\Sot\Monitor\Model\Device;
 use Ontic\Sot\Monitor\Repository\DeviceRepository;
 use PDO;
@@ -11,36 +12,40 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class HomeAssistantPlugin implements PluginInterface
 {
-    /** @var PDO */
-    private $pdo;
+    /** @var Configuration */
+    private $config;
+    /** @var EventDispatcher */
+    private $eventDispatcher;
+    /** @var DeviceRepository */
+    private $deviceRepository;
+
     /** @var array  */
     private $knownDevices = [];
     /** @var array */
     private $lines = [];
     /** @var string */
     private $buffer;
-    /** @var EventDispatcher */
-    private $eventDispatcher;
-    /** @var DeviceRepository */
-    private $deviceRepository;
 
     public function __construct
     (
-        PDO $pdo,
+        Configuration $config,
         EventDispatcher $eventDispatcher,
         DeviceRepository $deviceRepository
     )
     {
-        $this->pdo = $pdo;
+        $this->config = $config;
         $this->eventDispatcher = $eventDispatcher;
         $this->deviceRepository = $deviceRepository;
     }
 
     function run()
     {
+        $host = $this->config['homeassistant']['host'];
+        $port = $this->config['homeassistant']['port'];
+
         $socket = socket_create(AF_INET, SOCK_STREAM, 0) or die("Could not create socket\n");
         socket_set_block($socket);
-        $result = socket_connect($socket, '10.30.37.53', 12345) or die("Could not bind to socket\n");
+        $result = socket_connect($socket, $host, $port) or die("Could not bind to socket\n");
         while(($result = socket_read($socket, 1024)) !== false)
         {
             $this->buffer .= $result;

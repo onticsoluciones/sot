@@ -17,10 +17,12 @@ services:
   Ontic\Sot\Monitor\Subscriber\:
     resource: 'src/Subscriber'
 
+  Ontic\Sot\Monitor\Model\Configuration:
+    factory: Ontic\Sot\Monitor\Service\Factory\ConfigurationFactory:get
+
   PDO:
     class: PDO
     factory: Ontic\Sot\Monitor\Service\Factory\ConnectionFactory:get
 
   Symfony\Component\EventDispatcher\EventDispatcher:
     factory: Ontic\Sot\Monitor\Service\Factory\EventDispatcherFactory:get
-
