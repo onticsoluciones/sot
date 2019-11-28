@@ -47,7 +47,7 @@ class AlertRepository
 
     public function findAllAfter(int $timestamp): array
     {
-        $sql = 'SELECT * FROM alert WHERE timestamp > :timestamp;';
+        $sql = 'SELECT * FROM alert WHERE timestamp > :timestamp ORDER BY timestamp DESC;';
         $statement = $this->connection->prepare($sql);
         $statement->execute([ 'timestamp' => $timestamp ]);
 

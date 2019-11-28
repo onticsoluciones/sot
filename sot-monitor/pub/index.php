@@ -6,18 +6,31 @@ use Ontic\Sot\Monitor\Repository\AlertRepository;
 use Ontic\Sot\Monitor\Service\Factory\ContainerFactory;
 
 $container = ContainerFactory::get(__DIR__ . '/../');
-/** @var AlertRepository $repo */
 $repo = $container->get(AlertRepository::class);
-$alerts = [];
-foreach($repo->findRecent(10) as $device)
+$response = [];
+foreach(getAlerts($repo, @$_GET['from']) as $alert)
 {
-    $alerts[] = [
-        'type' => $device->getType(),
-        'data' => $device->getData(),
-        'timestamp' => $device->getTimestamp(),
-        'priority' => $device->getPriority()
+    $response[] = [
+        'type' => $alert->getType(),
+        'data' => $alert->getData(),
+        'timestamp' => $alert->getTimestamp(),
+        'priority' => $alert->getPriority()
     ];
 }
 
 header('Content-Type: application/json');
-echo json_encode($alerts);
+echo json_encode($response);
+
+function getAlerts(AlertRepository $repo, $timestamp)
+{
+    if($timestamp)
+    {
+        $alerts = $repo->findAllAfter($timestamp);
+    }
+    else
+    {
+        $alerts = $repo->findRecent(10);
+    }
+
+    return $alerts;
+}
