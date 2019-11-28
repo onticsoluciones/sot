@@ -1,0 +1,26 @@
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: true
+
+  Ontic\Sot\Monitor\Plugin\:
+    resource: 'src/Plugin'
+
+  Ontic\Sot\Monitor\Repository\:
+    resource: 'src/Repository'
+
+  Ontic\Sot\Monitor\Service\:
+    resource: 'src/Service'
+
+  Ontic\Sot\Monitor\Subscriber\:
+    resource: 'src/Subscriber'
+
+  PDO:
+    class: PDO
+    factory: Ontic\Sot\Monitor\Service\Factory\ConnectionFactory:get
+
+  Symfony\Component\EventDispatcher\EventDispatcher:
+    factory: Ontic\Sot\Monitor\Service\Factory\EventDispatcherFactory:get
+
