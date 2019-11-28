@@ -28,4 +28,41 @@ class AlertRepository
             'priority' => $alert->getPriority()
         ]);
     }
+
+    /**
+     * @param int $limit
+     * @return Alert[]
+     */
+    public function findRecent(int $limit): array
+    {
+        $sql = sprintf('SELECT * FROM alert ORDER BY timestamp DESC LIMIT %d;', $limit);
+        $statement = $this->connection->prepare($sql);
+        $statement->execute();
+
+        return array_map(function(array $row) {
+            return $this->parse($row);
+        }, $statement->fetchAll());
+
+    }
+
+    public function findAllAfter(int $timestamp): array
+    {
+        $sql = 'SELECT * FROM alert WHERE timestamp > :timestamp;';
+        $statement = $this->connection->prepare($sql);
+        $statement->execute([ 'timestamp' => $timestamp ]);
+
+        return array_map(function(array $row) {
+            return $this->parse($row);
+        }, $statement->fetchAll());
+    }
+
+    private function parse(array $row): Alert
+    {
+        $type = $row['type'];
+        $data = json_decode($row['data'], true);
+        $timestamp = $row['timestamp'];
+        $priority = $row['priority'];
+
+        return new Alert($type, $data, $timestamp, $priority);
+    }
 }

@@ -42,20 +42,6 @@ class DeviceRepository
         return null;
     }
 
-    /**
-     * @return Device[]
-     */
-    public function findAllUnacknowledged(): array
-    {
-        $sql = 'SELECT * FROM device WHERE acknowledged  = 0;';
-        $statement = $this->connection->prepare($sql);
-        $statement->execute();
-
-        return array_map(function(array $row) {
-            return $this->parse($row);
-        }, $statement->fetchAll());
-    }
-
     private function parse(array $row): Device
     {
         $id = $row['id'];

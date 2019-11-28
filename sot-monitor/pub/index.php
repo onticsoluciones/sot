@@ -2,21 +2,20 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Ontic\Sot\Monitor\Repository\DeviceRepository;
+use Ontic\Sot\Monitor\Repository\AlertRepository;
 use Ontic\Sot\Monitor\Service\Factory\ContainerFactory;
 
 $container = ContainerFactory::get(__DIR__ . '/../');
-/** @var DeviceRepository $repo */
-$repo = $container->get(DeviceRepository::class);
+/** @var AlertRepository $repo */
+$repo = $container->get(AlertRepository::class);
 $alerts = [];
-foreach($repo->findAllUnacknowledged() as $device)
+foreach($repo->findRecent(10) as $device)
 {
     $alerts[] = [
-        'type' => 'new_device',
-        'data' => [
-            'entity_id' => $device->getEntityId(),
-            'name' => $device->getName()
-        ]
+        'type' => $device->getType(),
+        'data' => $device->getData(),
+        'timestamp' => $device->getTimestamp(),
+        'priority' => $device->getPriority()
     ];
 }
 
