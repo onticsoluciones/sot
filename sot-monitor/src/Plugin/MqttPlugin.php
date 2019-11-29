@@ -36,6 +36,7 @@ class MqttPlugin implements PluginInterface
 
     public function onMessage($message)
     {
+        var_dump($message);
         foreach($this->handlers as $handler)
         {
             $handler->handle($message->topic, $message->payload);
