@@ -1,5 +1,7 @@
 <?php
 
+set_time_limit(600);
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Ontic\Sot\Monitor\Repository\AlertRepository;
@@ -8,7 +10,14 @@ use Ontic\Sot\Monitor\Service\Factory\ContainerFactory;
 $container = ContainerFactory::get(__DIR__ . '/../');
 $repo = $container->get(AlertRepository::class);
 $response = [];
-foreach(getAlerts($repo, @$_GET['from']) as $alert)
+$alerts = getAlerts($repo, @$_GET['from']);
+while(count($alerts) === 0)
+{
+    sleep(0.1);
+    $alerts = getAlerts($repo, @$_GET['from']);
+}
+
+foreach ($alerts as $alert)
 {
     $response[] = [
         'type' => $alert->getType(),
