@@ -1,0 +1,10 @@
+<?php
+
+    $server = 'URL'; // SoT notifications server
+    $time = 30; // Threshold alert time
+    $debug = true;
+
+    $username = 'USERNAME';
+    $password = 'PASSWORD';
+
+?>

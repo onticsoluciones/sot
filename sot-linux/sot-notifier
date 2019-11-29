@@ -1,17 +1,11 @@
 #!/usr/bin/env php
 <?php
 
-    $server = 'http://10.30.37.53:80/'; // SoT notifications server
-    $time = 30; // Threshold alert time
-    $debug = true;
-
-    $username = '';
-    $password = '';
+    include_once('config.php');
 
     ini:
 
     $now = time();
-
 
     $auth = base64_encode("$username:$password");
     $context = stream_context_create([
