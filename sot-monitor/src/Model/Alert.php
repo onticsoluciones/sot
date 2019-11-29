@@ -9,6 +9,9 @@ class Alert
     const PRIORITY_HIGH = 2;
     const PRIORITY_CRITICAL = 3;
 
+    const TYPE_ACTIVATION = 'activation';
+    const TYPE_DANGEROUS_ACTIVACION = 'dangerous_activation';
+
     /** @var string */
     private $type;
     /** @var array */

@@ -6,8 +6,9 @@ use Ontic\Sot\Monitor\Event\AlertEvent;
 use Ontic\Sot\Monitor\Model\Alert;
 use Ontic\Sot\Monitor\Model\Configuration;
 use Ontic\Sot\Monitor\Model\Device;
+use Ontic\Sot\Monitor\Plugin\HomeAssistantPlugin\DefinitionsHandler;
+use Ontic\Sot\Monitor\Plugin\HomeAssistantPlugin\HandlerInterface;
 use Ontic\Sot\Monitor\Repository\DeviceRepository;
-use PDO;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class HomeAssistantPlugin implements PluginInterface
@@ -18,11 +19,11 @@ class HomeAssistantPlugin implements PluginInterface
     private $eventDispatcher;
     /** @var DeviceRepository */
     private $deviceRepository;
+    /** @var HandlerInterface[] */
+    private $handlers;
 
     /** @var array  */
     private $knownDevices = [];
-    /** @var array */
-    private $lines = [];
     /** @var string */
     private $buffer;
 
@@ -30,12 +31,14 @@ class HomeAssistantPlugin implements PluginInterface
     (
         Configuration $config,
         EventDispatcher $eventDispatcher,
-        DeviceRepository $deviceRepository
+        DeviceRepository $deviceRepository,
+        DefinitionsHandler $definitionsHandler
     )
     {
         $this->config = $config;
         $this->eventDispatcher = $eventDispatcher;
         $this->deviceRepository = $deviceRepository;
+        $this->handlers[] = $definitionsHandler;
     }
 
     function run()
@@ -49,16 +52,21 @@ class HomeAssistantPlugin implements PluginInterface
         while(($result = socket_read($socket, 1024)) !== false)
         {
             $this->buffer .= $result;
+            $lines = [];
             while(($idx = strpos($this->buffer, "\n",)) !== false)
             {
                 $fragments = preg_split("/\n/", $this->buffer, 2);
-                $this->lines[] = $fragments[0];
+                $lines[] = $fragments[0];
                 $this->buffer = $fragments[1];
             }
 
-            foreach($this->lines as $line)
+            foreach($lines as $line)
             {
                 $this->findDevice($line);
+                foreach($this->handlers as $handler)
+                {
+                    $handler->handle($line);
+                }
             }
         }
     }

@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Dangerous switch",
+    "source": "hasslog",
+    "pattern": "/aioesphomeapi\\.connection.+key: 646529562\nstate: true/m",
+    "alert_type": "dangerous_activation",
+    "priority": 4
+  },
+  {
+    "name": "Safe switch",
+    "source": "hasslog",
+    "pattern": "/aioesphomeapi\\.connection.+key: 256725936\nstate: true/m",
+    "alert_type": "activation",
+    "priority": 1
+  }
+]
