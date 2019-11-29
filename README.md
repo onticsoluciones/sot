@@ -9,6 +9,7 @@ que tenga en su red.
 Está enfocado a los usuarios con menos experiencia que deseen saber en todo momento si la red 
 de casa funciona de forma adecuada.
 
+
 Funcionamiento
 
 Se trata de un servicio capaz de reconocer los diferentes sistemas de domótica existentes en el mercado
