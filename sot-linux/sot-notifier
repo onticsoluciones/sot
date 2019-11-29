@@ -5,11 +5,21 @@
     $time = 30; // Threshold alert time
     $debug = true;
 
+    $username = '';
+    $password = '';
+
     ini:
 
     $now = time();
 
-    $notifications = json_decode(file_get_contents($server));
+
+    $auth = base64_encode("$username:$password");
+    $context = stream_context_create([
+	"http" => [
+	    "header" => "Authorization: Basic $auth"
+	]
+    ]);
+    $notifications = json_decode(file_get_contents($server, false, $context));
 
     foreach($notifications as $notification)
     {
