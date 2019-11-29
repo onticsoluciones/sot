@@ -1,0 +1,49 @@
+#!/usr/bin/env php
+<?php
+
+    $server = 'http://10.30.37.53:80/'; // SoT notifications server
+    $time = 30; // Threshold alert time
+    $debug = true;
+
+    ini:
+
+    $now = time();
+
+    $notifications = json_decode(file_get_contents($server));
+
+    foreach($notifications as $notification)
+    {
+	//priority
+	switch($notification->priority)
+	{
+	    case 4:
+		    $face = 'face-angry';
+		    break;
+	    case 3:
+		    $face = 'face-surprise';
+		    break;
+	    case 2:
+		    $face = 'face-uncertain';
+		    break;
+	    case 1:
+		    $face = 'face-glasses';
+		    break;
+	    case 0:
+	    default:
+		    $face = 'face-cool';
+		    break;
+	}
+
+	if($notification->type == 'intermittent_power' && $notification->timestamp > $now-$time)
+	{
+	    
+
+	    if($debug) print_r($notification);
+	    system('notify-send -i '.$face.' "Alerta intermitencia dispositivo '.$notification->data->device.'"');
+	    sleep($time);
+	    if($debug)echo "READY\n";
+	}
+    }
+
+    goto ini;
+?>
