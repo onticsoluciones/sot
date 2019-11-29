@@ -9,23 +9,26 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import es.ontic.sot.model.Alert;
 import es.ontic.sot.parser.AlertParser;
@@ -36,6 +39,8 @@ public class MainActivity extends AppCompatActivity
     private long startTime = System.currentTimeMillis() / 1000;
 
     EditText uiHost;
+    EditText uiUser;
+    EditText uiPassword;
     Button uiConnect;
 
     @Override
@@ -46,28 +51,17 @@ public class MainActivity extends AppCompatActivity
         createNotificationChannel();
 
         uiHost = findViewById(R.id.host);
+        uiUser = findViewById(R.id.user);
+        uiPassword = findViewById(R.id.password);
         uiConnect = findViewById(R.id.connect);
 
         uiHost.setText(getPreferences(MODE_PRIVATE).getString("host", ""));
+        uiUser.setText(getPreferences(MODE_PRIVATE).getString("user", ""));
+        uiPassword.setText(getPreferences(MODE_PRIVATE).getString("password", ""));
 
-        uiHost.addTextChangedListener(new TextWatcher()
-        {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
-            @SuppressLint("ApplySharedPref")
-            @Override
-            public void afterTextChanged(Editable s)
-            {
-                getPreferences(MODE_PRIVATE)
-                    .edit()
-                    .putString("host", s.toString())
-                    .commit();
-            }
-        });
+        uiHost.addTextChangedListener(new PersistentTextWatcher(this, "host"));
+        uiUser.addTextChangedListener(new PersistentTextWatcher(this, "user"));
+        uiPassword.addTextChangedListener(new PersistentTextWatcher(this, "password"));
 
         uiConnect.setOnClickListener(new View.OnClickListener()
         {
@@ -77,7 +71,12 @@ public class MainActivity extends AppCompatActivity
                 if(uiConnect.getText() == getString(R.string.connect))
                 {
                     uiConnect.setText(R.string.disconnect);
-                    getAlerts(uiHost.getText().toString(), getTimestamp());
+                    getAlerts(
+                        uiHost.getText().toString(),
+                        uiUser.getText().toString(),
+                        uiPassword.getText().toString(),
+                        getTimestamp()
+                    );
                 }
                 else
                 {
@@ -103,7 +102,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private void getAlerts(final String host, final Long timestamp)
+    private void getAlerts(final String host, final String user, final String password, final Long timestamp)
     {
         RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -134,7 +133,7 @@ public class MainActivity extends AppCompatActivity
                         }
                         finally
                         {
-                            getAlerts(host, lastTimestamp);
+                            getAlerts(host, user, password, lastTimestamp);
                         }
                     }
                 }, new Response.ErrorListener()
@@ -142,13 +141,33 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onErrorResponse(VolleyError error)
             {
-                getAlerts(host, timestamp);
+                if(error instanceof TimeoutError)
+                {
+                    getAlerts(host, user, password, timestamp);
+                }
+                else
+                {
+                    Toast.makeText(MainActivity.this, error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                    uiConnect.setText(R.string.connect);
+                }
             }
-        });
+        }) {
+            @Override
+            public Map<String, String> getHeaders()
+            {
+                Map<String, String> params = new HashMap<>();
+                params.put(
+                        "Authorization",
+                        String.format("Basic %s", Base64.encodeToString(
+                                String.format("%s:%s", user, password).getBytes(), Base64.DEFAULT)));
 
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(600000,
+                return params;
+            }
+        };
+
+        /*stringRequest.setRetryPolicy(new DefaultRetryPolicy(600000,
             DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));*/
 
         queue.add(stringRequest);
     }
