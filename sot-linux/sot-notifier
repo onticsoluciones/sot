@@ -43,7 +43,7 @@
 	    
 
 	    if($debug) print_r($notification);
-	    system('notify-send -i '.$face.' "Alerta intermitencia dispositivo '.$notification->data->device.'"');
+	    system('notify-send -i '.$face.' "Alerta intermitencia dispositivo '.escapeshellarg($notification->data->device).'"');
 	    sleep($time);
 	    if($debug)echo "READY\n";
 	}
