@@ -8,6 +8,7 @@ use Ontic\Sot\Monitor\Model\Configuration;
 use Ontic\Sot\Monitor\Model\Device;
 use Ontic\Sot\Monitor\Plugin\HomeAssistantPlugin\DefinitionsHandler;
 use Ontic\Sot\Monitor\Plugin\HomeAssistantPlugin\HandlerInterface;
+use Ontic\Sot\Monitor\Plugin\HomeAssistantPlugin\IntermittentPowerHandler;
 use Ontic\Sot\Monitor\Repository\DeviceRepository;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -32,13 +33,15 @@ class HomeAssistantPlugin implements PluginInterface
         Configuration $config,
         EventDispatcher $eventDispatcher,
         DeviceRepository $deviceRepository,
-        DefinitionsHandler $definitionsHandler
+        DefinitionsHandler $definitionsHandler,
+        IntermittentPowerHandler $intermittentPowerHandler
     )
     {
         $this->config = $config;
         $this->eventDispatcher = $eventDispatcher;
         $this->deviceRepository = $deviceRepository;
         $this->handlers[] = $definitionsHandler;
+        $this->handlers[] = $intermittentPowerHandler;
     }
 
     function run()

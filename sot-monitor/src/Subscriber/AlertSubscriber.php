@@ -25,6 +25,7 @@ class AlertSubscriber implements EventSubscriberInterface
 
     public function onAlert(AlertEvent $alertEvent)
     {
+        echo sprintf('%s %s', $alertEvent->getAlert()->getType(), $alertEvent->getAlert()->getData()['device']) . PHP_EOL;
         $this->alertRepository->save($alertEvent->getAlert());
     }
 }
