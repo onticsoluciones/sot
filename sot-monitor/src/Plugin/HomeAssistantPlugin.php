@@ -46,10 +46,19 @@ class HomeAssistantPlugin implements PluginInterface
 
     function run()
     {
-        $host = $this->config['homeassistant']['host'];
-        $port = $this->config['homeassistant']['port'];
+        $cmd = sprintf('tail -f %s 2>&1', escapeshellarg($this->config['homeassistant']['file']));
+        $handle = popen($cmd, 'r');
+        while (!feof($handle))
+        {
+            $line = rtrim(fgets($handle));
+            $this->findDevice($line);
+            foreach($this->handlers as $handler)
+            {
+                $handler->handle($line);
+            }
+        }
 
-        $socket = socket_create(AF_INET, SOCK_STREAM, 0) or die("Could not create socket\n");
+        /*$socket = socket_create(AF_INET, SOCK_STREAM, 0) or die("Could not create socket\n");
         socket_set_block($socket);
         $result = socket_connect($socket, $host, $port) or die("Could not bind to socket\n");
         while(($result = socket_read($socket, 1024)) !== false)
@@ -71,7 +80,7 @@ class HomeAssistantPlugin implements PluginInterface
                     $handler->handle($line);
                 }
             }
-        }
+        }*/
     }
 
     private function findDevice(string $line)
