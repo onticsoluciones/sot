@@ -4,6 +4,7 @@ namespace Ontic\Sot\Monitor\Plugin;
 
 use Ontic\Sot\Monitor\Model\Configuration;
 use Ontic\Sot\Monitor\Plugin\MqttPlugin\HandlerInterface;
+use Ontic\Sot\Monitor\Plugin\MqttPlugin\InconsistencyDetectionHandler;
 use Ontic\Sot\Monitor\Plugin\MqttPlugin\IntermittentPowerHandler;
 
 class MqttPlugin implements PluginInterface
@@ -16,11 +17,13 @@ class MqttPlugin implements PluginInterface
     public function __construct
     (
         Configuration $config,
-        IntermittentPowerHandler $intermittentPowerHandler
+        IntermittentPowerHandler $intermittentPowerHandler,
+        InconsistencyDetectionHandler $inconsistencyDetectionHandler
     )
     {
         $this->config = $config;
         $this->handlers[] = $intermittentPowerHandler;
+        $this->handlers[] = $inconsistencyDetectionHandler;
     }
 
     public function run()

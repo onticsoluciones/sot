@@ -3,7 +3,9 @@
     "robmorgan/phinx": "^0.11.1",
     "symfony/dependency-injection": "4.1.12",
     "symfony/event-dispatcher": "4.4",
-    "symfony/yaml": "^4"
+    "symfony/yaml": "^4",
+    "ext-pdo": "*",
+    "ext-json": "*"
   },
   "autoload": {
     "psr-4": {

@@ -8,6 +8,7 @@ use Ontic\Sot\Monitor\Model\Configuration;
 use Ontic\Sot\Monitor\Model\Device;
 use Ontic\Sot\Monitor\Plugin\HomeAssistantPlugin\DefinitionsHandler;
 use Ontic\Sot\Monitor\Plugin\HomeAssistantPlugin\HandlerInterface;
+use Ontic\Sot\Monitor\Plugin\HomeAssistantPlugin\InconsistencyDetectionHandler;
 use Ontic\Sot\Monitor\Plugin\HomeAssistantPlugin\IntermittentPowerHandler;
 use Ontic\Sot\Monitor\Repository\DeviceRepository;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -25,8 +26,6 @@ class HomeAssistantPlugin implements PluginInterface
 
     /** @var array  */
     private $knownDevices = [];
-    /** @var string */
-    private $buffer;
 
     public function __construct
     (
@@ -34,7 +33,8 @@ class HomeAssistantPlugin implements PluginInterface
         EventDispatcher $eventDispatcher,
         DeviceRepository $deviceRepository,
         DefinitionsHandler $definitionsHandler,
-        IntermittentPowerHandler $intermittentPowerHandler
+        IntermittentPowerHandler $intermittentPowerHandler,
+        InconsistencyDetectionHandler $inconsistencyDetectionHandler
     )
     {
         $this->config = $config;
@@ -42,6 +42,7 @@ class HomeAssistantPlugin implements PluginInterface
         $this->deviceRepository = $deviceRepository;
         $this->handlers[] = $definitionsHandler;
         $this->handlers[] = $intermittentPowerHandler;
+        $this->handlers[] = $inconsistencyDetectionHandler;
     }
 
     function run()
@@ -123,7 +124,7 @@ class HomeAssistantPlugin implements PluginInterface
 
         $alert = new Alert('new_device', [
             'entity_id' => $entityId,
-            'name' => $name
+            'device' => $name
         ], time(), Alert::PRIORITY_NORMAL);
 
         $this->eventDispatcher->dispatch(new AlertEvent($alert), AlertEvent::NAME);

@@ -11,6 +11,7 @@ class Alert
 
     const TYPE_ACTIVATION = 'activation';
     const TYPE_DANGEROUS_ACTIVACION = 'dangerous_activation';
+    const TYPE_INCONSISTENCY = 'inconsistency';
 
     /** @var string */
     private $type;
