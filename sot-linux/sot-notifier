@@ -3,9 +3,22 @@
 
     include_once('config.php');
 
+    $timestampFile = __DIR__ . '/timestamp';
+
     ini:
 
     $now = time();
+    $from = null;
+    if(file_exists($timestampFile))
+    {
+        $from = file_get_contents($timestampFile);
+    }
+    $url = $server;
+    if($from !== null)
+    {
+	$url .= '?from=' . $from;
+    }
+    echo $url . PHP_EOL;
 
     $auth = base64_encode("$username:$password");
     $context = stream_context_create([
@@ -13,24 +26,28 @@
 	    "header" => "Authorization: Basic $auth"
 	]
     ]);
-    $notifications = json_decode(file_get_contents($server, false, $context));
+    $notifications = json_decode(file_get_contents($url, false, $context));
 
     foreach($notifications as $notification)
     {
+        if($from === null || $notification->timestamp > $from)
+        {
+            $from = $notification->timestamp;
+        }
+
+	if($debug) print_r($notification);
+
 	//priority
 	switch($notification->priority)
 	{
-	    case 4:
+	    case 3:
 		    $face = 'face-angry';
 		    break;
-	    case 3:
+	    case 2:
 		    $face = 'face-surprise';
 		    break;
-	    case 2:
-		    $face = 'face-uncertain';
-		    break;
 	    case 1:
-		    $face = 'face-glasses';
+		    $face = 'face-uncertain';
 		    break;
 	    case 0:
 	    default:
@@ -38,16 +55,31 @@
 		    break;
 	}
 
-	if($notification->type == 'intermittent_power' && $notification->timestamp > $now-$time)
+	if($notification->type == 'intermittent_power')
 	{
-	    
-
-	    if($debug) print_r($notification);
 	    system('notify-send -i '.$face.' "Alerta intermitencia dispositivo '.escapeshellarg($notification->data->device).'"');
-	    sleep($time);
-	    if($debug)echo "READY\n";
 	}
+	elseif($notification->type == 'new_device')
+	{
+	    system('notify-send -i '.$face.' "Nuevo dispositivo detectado: '.escapeshellarg($notification->data->device).'"');
+	}
+	elseif($notification->type == 'dangerous_activation')
+	{
+	    system('notify-send -i '.$face.' "¡PELIGRO! Detectado en '.escapeshellarg($notification->data->device).'"');
+	}
+	elseif($notification->type == 'activation')
+	{
+	    system('notify-send -i '.$face.' "Todo va bien con '.escapeshellarg($notification->data->device).'"');
+	}
+	elseif($notification->type == 'inconsistency')
+	{
+	    system('notify-send -i '.$face.' "Inconsistencia detectada. Comando simulado en '.escapeshellarg($notification->data->device).'"');
+	}
+
+	if($debug)echo "READY\n";
     }
+
+    file_put_contents($timestampFile, $from);
 
     goto ini;
 ?>
