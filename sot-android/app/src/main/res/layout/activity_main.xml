@@ -38,11 +38,19 @@
         android:inputType="textPassword"
         />
 
+    <Spinner
+        android:id="@+id/priority"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_below="@id/password"
+        />
+
     <Button
         android:id="@+id/connect"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/password"
+        android:layout_below="@id/priority"
         android:text="@string/connect"
         />
 

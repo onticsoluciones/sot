@@ -11,8 +11,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity
     EditText uiHost;
     EditText uiUser;
     EditText uiPassword;
+    Spinner uiPriority;
     Button uiConnect;
 
     @Override
@@ -53,11 +56,19 @@ public class MainActivity extends AppCompatActivity
         uiHost = findViewById(R.id.host);
         uiUser = findViewById(R.id.user);
         uiPassword = findViewById(R.id.password);
+        uiPriority = findViewById(R.id.priority);
         uiConnect = findViewById(R.id.connect);
 
         uiHost.setText(getPreferences(MODE_PRIVATE).getString("host", ""));
         uiUser.setText(getPreferences(MODE_PRIVATE).getString("user", ""));
         uiPassword.setText(getPreferences(MODE_PRIVATE).getString("password", ""));
+
+        final ArrayAdapter adapter = new ArrayAdapter<>(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            new String[] { "LOW", "NORMAL", "HIGH", "CRITICAL" }
+        );
+        uiPriority.setAdapter(adapter);
 
         uiHost.addTextChangedListener(new PersistentTextWatcher(this, "host"));
         uiUser.addTextChangedListener(new PersistentTextWatcher(this, "user"));
@@ -165,9 +176,9 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        /*stringRequest.setRetryPolicy(new DefaultRetryPolicy(600000,
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(600000,
             DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));*/
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
         queue.add(stringRequest);
     }
@@ -197,9 +208,17 @@ public class MainActivity extends AppCompatActivity
 
     private void displayAlert(Alert alert)
     {
+        final int alertLevel = uiPriority.getSelectedItemPosition();
+
+        if(alert.getPriority() < alertLevel)
+        {
+            return;
+        }
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.stat_sys_warning)
                 .setContentTitle(getAlertTitle(alert.getType()))
+                .setContentText(getAlertText(alert.getType(), alert.getDevice()))
                 .setStyle(new NotificationCompat.BigTextStyle()
                         .bigText(getAlertText(alert.getType(), alert.getDevice())))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
@@ -225,11 +244,19 @@ public class MainActivity extends AppCompatActivity
     {
         if(Alert.TYPE_NEW_DEVICE.equals(type))
         {
-            return "Dispositivo desconocido";
+            return "Unknown device";
         }
         else if(Alert.TYPE_INTERMITTENT_POWER.equals(type))
         {
-            return "Funcionamiento intermitente";
+            return "Reboot loop";
+        }
+        else if(Alert.TYPE_ACTIVATION.equals(type))
+        {
+            return "Device activation";
+        }
+        else if(Alert.TYPE_DANGEROUS_ACTIVATION.equals(type))
+        {
+            return "Dangerous device activation";
         }
         else
         {
@@ -241,11 +268,19 @@ public class MainActivity extends AppCompatActivity
     {
         if(Alert.TYPE_NEW_DEVICE.equals(type))
         {
-            return String.format("Ha aparecido un nuevo dispositivo \"%s\" en la red.", device);
+            return String.format("An unknown device \"%s\" has been detected on the network.", device);
         }
         else if(Alert.TYPE_INTERMITTENT_POWER.equals(type))
         {
-            return String.format("El dispositivo \"%s\" se ha reiniciado múltiples veces de manera súbita.", device);
+            return String.format("Device \"%s\" has been restarted multiple times in a short while.", device);
+        }
+        else if(Alert.TYPE_ACTIVATION.equals(type))
+        {
+            return String.format("Device \"%s\" has been activated.", device);
+        }
+        else if(Alert.TYPE_DANGEROUS_ACTIVATION.equals(type))
+        {
+            return String.format("Device \"%s\" has been unexpectedly activated.", device);
         }
         else
         {
