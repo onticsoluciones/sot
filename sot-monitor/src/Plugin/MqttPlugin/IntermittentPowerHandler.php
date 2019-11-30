@@ -58,7 +58,7 @@ class IntermittentPowerHandler implements HandlerInterface
 
         if($consecutiveEvents > 3)
         {
-            $alert = new Alert('intermittent_power', [ 'device' => $key ], time(), Alert::PRIORITY_HIGH);
+            $alert = new Alert('intermittent_power', [ 'device' => $key ], time(), Alert::PRIORITY_CRITICAL);
             $this->eventDispatcher->dispatch(new AlertEvent($alert), AlertEvent::NAME);
         }
     }
