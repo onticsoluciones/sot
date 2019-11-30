@@ -8,6 +8,7 @@ public class Alert
     public static final String TYPE_INTERMITTENT_POWER = "intermittent_power";
     public static final String TYPE_ACTIVATION = "activation";
     public static final String TYPE_DANGEROUS_ACTIVATION = "dangerous_activation";
+    public static final String TYPE_INCOSISTENCY = "inconsistency";
     public static final String TYPE_DEVICE_OFFLLINE = "device_online";
 
     private String type;

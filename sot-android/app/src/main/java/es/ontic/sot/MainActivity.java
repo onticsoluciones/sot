@@ -258,6 +258,10 @@ public class MainActivity extends AppCompatActivity
         {
             return "Dangerous device activation";
         }
+        else if(Alert.TYPE_INCOSISTENCY.equals(type))
+        {
+            return "Attack attempt";
+        }
         else
         {
             return type;
@@ -282,9 +286,13 @@ public class MainActivity extends AppCompatActivity
         {
             return String.format("Device \"%s\" has been unexpectedly activated.", device);
         }
+        else if(Alert.TYPE_INCOSISTENCY.equals(type))
+        {
+            return String.format("Inconsistency found on commands sent by device \"%s\".", device);
+        }
         else
         {
-            return String.format("Se ha producido una incidencia con el dispositivo \"%s\".", device);
+            return String.format("Device \"%s\" generated an alert.", device);
         }
     }
 
